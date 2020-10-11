@@ -13,6 +13,9 @@ The function implement in this project :
 ![FlowChat](./pic/flow.png)
 ![Architecture Diagram](./pic/act.png)
 
+when you run it , remember to start server side first 
+Then you can start client side , remember the client number do not exceed max number of Thread pool
 
-
+Server : `ChatServer.java`
+Server : `ChatClient.java`
 
