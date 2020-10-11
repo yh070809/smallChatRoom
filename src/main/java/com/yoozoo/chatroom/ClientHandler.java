@@ -57,6 +57,7 @@ public class ClientHandler implements Runnable{
             out.close();
             try {
                 in.close();
+                out.println("[Server msg] " + Cache.clientThread.get(client.getLocalPort()) + " Offline");
             }catch (IOException e) {
                 e.printStackTrace();
             }
@@ -66,7 +67,7 @@ public class ClientHandler implements Runnable{
 
     private void boardCast(String msg) {
         for(HashMap.Entry<String, ClientHandler> client : clients.entrySet()){
-            client.getValue().out.println(client.getKey() + " : " + msg);
+            client.getValue().out.println(msg);
         }
     }
 

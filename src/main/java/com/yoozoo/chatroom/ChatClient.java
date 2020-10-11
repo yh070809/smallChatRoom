@@ -26,10 +26,11 @@ public class ChatClient {
         socket.close();
         System.exit(0);
     }
-
     public static void  briefingBanner(){
         System.out.print("====================  Welcome to Chat Room =======================" +
-                '\n' +
+                "\n" +
+                "Type 'Register [username] ' to register" +
+                "\n" +
                 "Type 'Login [username]' to login" +
                 "\n" +
                 "Type 'Send [username] [message]' to send message to defined user" +
@@ -40,7 +41,7 @@ public class ChatClient {
                 "\n" +
                 "Type 'Forward [username] ' to forward the message to defined user"+
                 "\n" +
-                "Type 'Register [username] ' to register" +
+                "Type 'Broadcast [msg] ' to forward the message to defined user"+
                 "\n" +
                 "Type 'Logout' to logout" +"\n"
         );
