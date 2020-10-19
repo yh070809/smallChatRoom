@@ -13,7 +13,7 @@ public class ChatClient {
     public static void main(String[] args) throws IOException {
         Socket socket = new Socket(SERVER_IP,SERVER_PORT);
         SeverConnection severConn = new SeverConnection(socket);
-        Cache.clientThread.put(socket.getLocalPort(),null);
+        Cache.clientThread.put(socket.getPort(),null);
         BufferedReader keyboard = new BufferedReader(new InputStreamReader(System.in));
         PrintWriter out = new PrintWriter(socket.getOutputStream(),true);
         new Thread(severConn).start();

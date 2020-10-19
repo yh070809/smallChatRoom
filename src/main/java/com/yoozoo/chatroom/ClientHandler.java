@@ -57,7 +57,7 @@ public class ClientHandler implements Runnable{
             out.close();
             try {
                 in.close();
-                out.println("[Server msg] " + Cache.clientThread.get(client.getLocalPort()) + " Offline");
+                out.println("[Server msg] " + Cache.clientThread.get(client.getPort()) + " Offline");
             }catch (IOException e) {
                 e.printStackTrace();
             }
@@ -73,8 +73,8 @@ public class ClientHandler implements Runnable{
 
     private void processSendMessage (String request){
         //verify login
-        if(Cache.clientThread.containsKey(client.getLocalPort())){
-            String senderName = Cache.clientThread.get(client.getLocalPort());
+        if(Cache.clientThread.containsKey(client.getPort())){
+            String senderName = Cache.clientThread.get(client.getPort());
             String str[] = request.split(" ");
             String receiveName = str[1];
             String sendMsg = "";
@@ -89,12 +89,16 @@ public class ClientHandler implements Runnable{
     }
 
     private void sendMsg (String receiveName,String senderName,String sendMsg){
+        System.out.println("sendMsg recevieName: " + receiveName +
+                           " senderName: " + senderName +
+                           " sendMsg: " + sendMsg);
         // receiver exist
         if(Cache.registeredClient.containsKey(receiveName)){
             // user online
             if(Cache.registeredClient.get(receiveName) != null){
                 clients.get(receiveName).out.println(sendMsg);
-                 int localPort = clients.get(receiveName).client.getLocalPort();
+                 int localPort = clients.get(receiveName).client.getPort();
+                 System.out.println("hahahahahah" + localPort);
                  //维护最新消息
                  Map<String,String> map = Cache.Threads.get(localPort);
                  map.put(Cache.RECEIVENAME,senderName);
@@ -112,6 +116,10 @@ public class ClientHandler implements Runnable{
                         //sender first time to send
                         Queue<String> q = new LinkedList<>();
                         q.offer(sendMsg);
+
+                        for (Map.Entry<String, Queue> mq : Cache.msgQueue.get(receiveName).entrySet()) {
+                            System.out.println("key: " + mq.getKey() + " Value: " + mq.getValue());
+                        }
                         Cache.msgQueue.get(receiveName).put(senderName,q);
                     }
 
@@ -135,7 +143,7 @@ public class ClientHandler implements Runnable{
 
     private void processReadMessage(String request){
         String senderName = request.split(" ")[1];
-        String curName = Cache.clientThread.get(client.getLocalPort());
+        String curName = Cache.clientThread.get(client.getPort());
         if(Cache.msgQueue.containsKey(curName)){
             Map<String,Queue> map = Cache.msgQueue.get(curName);
             Queue<String> q =  map.get(senderName);
@@ -150,7 +158,7 @@ public class ClientHandler implements Runnable{
     }
 
     private  void processReplyMessage (String request)  {
-        Map<String,String> map  = Cache.Threads.get(client.getLocalPort());
+        Map<String,String> map  = Cache.Threads.get(client.getPort());
         String senderName = map.get(Cache.SENDNAME);
         String receiveName = map.get(Cache.RECEIVENAME);
         String str[] = request.split(" ");
@@ -161,7 +169,7 @@ public class ClientHandler implements Runnable{
        sendMsg(receiveName,senderName,sendMsg);
     }
     private void processForwardMessage(String request){
-        Map<String,String> map  = Cache.Threads.get(client.getLocalPort());
+        Map<String,String> map  = Cache.Threads.get(client.getPort());
         String senderName = map.get(Cache.SENDNAME);
         String sendMsg = map.get(Cache.MSG);
         String str[] = request.split(" ");
@@ -174,6 +182,7 @@ public class ClientHandler implements Runnable{
             Map<String, Queue> map = Cache.msgQueue.get(curName);
             int count =0;
             for(Map.Entry<String, Queue> mq : map.entrySet()){
+                System.out.println(mq.getKey());
                 if(!mq.getValue().isEmpty()){
                     int size = mq.getValue().size();
                     out.println("[Server] -- You have " + size  +"message from " + mq.getKey());
@@ -192,12 +201,12 @@ public class ClientHandler implements Runnable{
         String loginName = request.split(" ")[1];
         if (Cache.registeredClient.containsKey(loginName)){
             // value 赋值为port no. if it has value means this person oneline, null-> offline
-            Cache.registeredClient.put(loginName,client.getLocalPort());
+            Cache.registeredClient.put(loginName,client.getPort());
 //            HashMap<String,String> map = new HashMap<>();
 //            map.put(Cache.SENDNAME,loginName);
-//            Cache.currentThread.put(client.getLocalPort(),map);
+//            Cache.currentThread.put(client.getPort(),map);
 
-            Cache.clientThread.put(client.getLocalPort(),loginName);
+            Cache.clientThread.put(client.getPort(),loginName);
             clients.put(loginName,this);
             out.println("[Server] -- " + loginName +" logged in" + " == " + (new Date()).toString());
            // out.println((new Date()).toString());
@@ -215,19 +224,19 @@ public class ClientHandler implements Runnable{
             Cache.registeredClient.put(registerName,null);
             Map<String,String> map = new HashMap<>();
             map.put(Cache.SENDNAME,registerName);
-            Cache.Threads.put(client.getLocalPort(),map);
+            Cache.Threads.put(client.getPort(),map);
             out.println("[Server] -- " + "User "  + registerName +" registered ");
         }
     }
 
     private String getThreadName (){
-        Map<String,String> map = Cache.Threads.get(client.getLocalPort());
+        Map<String,String> map = Cache.Threads.get(client.getPort());
         String curName= map.get(Cache.SENDNAME);
         return  curName;
     }
 
     private void matainlatestMsg(String reveiceName, String msg){
-        Map<String,String> map = Cache.Threads.get(client.getLocalPort());
+        Map<String,String> map = Cache.Threads.get(client.getPort());
         map.put(Cache.RECEIVENAME,reveiceName);
         map.put(Cache.MSG,msg);
     }

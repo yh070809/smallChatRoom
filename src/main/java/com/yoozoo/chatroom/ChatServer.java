@@ -22,6 +22,7 @@ public class ChatServer {
             Socket socket = server.accept();
             count +=1;
             System.out.println("[Server] " + count + " user online");
+            System.out.println("socket port:" + socket.getPort());
             ClientHandler clientThread = new ClientHandler(socket,clients);
             //clients.add(clientThread);
             pool.execute(clientThread);
