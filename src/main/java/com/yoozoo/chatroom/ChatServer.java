@@ -21,8 +21,7 @@ public class ChatServer {
             System.out.println("[Server] Waiting for clients connection");
             Socket socket = server.accept();
             count +=1;
-            System.out.println("[Server] " + count + " user online");
-            System.out.println("socket port:" + socket.getPort());
+            System.out.println("[Server] " + count + " user connected");
             ClientHandler clientThread = new ClientHandler(socket,clients);
             //clients.add(clientThread);
             pool.execute(clientThread);

@@ -1,5 +1,7 @@
 package com.yoozoo.chatroom;
 
+import com.sun.org.apache.xpath.internal.objects.XNull;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -47,6 +49,8 @@ public class ClientHandler implements Runnable{
                     if( firstSpace != -1){
                         boardCast(request.substring(firstSpace+1));
                     }
+                }else if(request.startsWith("Logout")){
+                    processLogout();
                 }else{
                     out.println("[Server] --- Please type valid command");
                 }
@@ -89,16 +93,16 @@ public class ClientHandler implements Runnable{
     }
 
     private void sendMsg (String receiveName,String senderName,String sendMsg){
-        System.out.println("sendMsg recevieName: " + receiveName +
-                           " senderName: " + senderName +
-                           " sendMsg: " + sendMsg);
+//        System.out.println("sendMsg recevieName: " + receiveName +
+//                           " senderName: " + senderName +
+//                           " sendMsg: " + sendMsg);
         // receiver exist
         if(Cache.registeredClient.containsKey(receiveName)){
             // user online
             if(Cache.registeredClient.get(receiveName) != null){
-                clients.get(receiveName).out.println(sendMsg);
+                clients.get(receiveName).out.println(senderName+ ": " + sendMsg);
                  int localPort = clients.get(receiveName).client.getPort();
-                 System.out.println("hahahahahah" + localPort);
+                 // System.out.println("receiver port:" + localPort);
                  //维护最新消息
                  Map<String,String> map = Cache.Threads.get(localPort);
                  map.put(Cache.RECEIVENAME,senderName);
@@ -107,6 +111,7 @@ public class ClientHandler implements Runnable{
             }else{
                 //Save msg to msgQueue first
                 //receiver has unread msg
+              //  System.out.println("offline hahahah");
                 if(Cache.msgQueue.containsKey(receiveName)){
                     //sender send already
                     if(Cache.msgQueue.get(receiveName).containsKey(senderName)){
@@ -185,7 +190,7 @@ public class ClientHandler implements Runnable{
                 System.out.println(mq.getKey());
                 if(!mq.getValue().isEmpty()){
                     int size = mq.getValue().size();
-                    out.println("[Server] -- You have " + size  +"message from " + mq.getKey());
+                    out.println("[Server] -- You have " + size  +" message from " + mq.getKey());
                 }else{
                   count ++;
                 }
@@ -239,6 +244,21 @@ public class ClientHandler implements Runnable{
         Map<String,String> map = Cache.Threads.get(client.getPort());
         map.put(Cache.RECEIVENAME,reveiceName);
         map.put(Cache.MSG,msg);
+    }
+
+    private void processLogout(){
+        String logoutName =  Cache.clientThread.get(client.getPort());
+        Cache.registeredClient.put(logoutName,null);
+        if(client!=null) {
+            try {
+                client.close();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+        Cache.clientThread.remove(client.getPort());
+        Cache.Threads.remove(client.getPort());
+        boardCast("[SERVER] --" + logoutName + " offline");
     }
 
 }
